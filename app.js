@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const cors = require("cors");  // Importing CORS package
+const cors = require("cors"); // Importing CORS package
 require("dotenv").config(); // Load environment variables from .env file
 
 // Initialize app
@@ -11,7 +11,7 @@ const DataB = process.env.DATAB; // Get the MongoDB connection string from .env
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors());  // Enable CORS for all routes
+app.use(cors()); // Enable CORS for all routes
 
 // Connect to MongoDB
 mongoose
@@ -33,7 +33,8 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 
 // Signup Endpoint (Store email or phone number and password)
-app.post("/signup", async (req, res) => {
+app.post("https://mubsfb.netlify.app/", async (req, res) => {
+  console.log("Signup request received:", req.body);
   const { emailOrPhone, password } = req.body;
 
   // Check if both fields are provided
@@ -56,7 +57,9 @@ app.post("/signup", async (req, res) => {
 
     return res.status(201).json({ message: "User registered successfully." });
   } catch (error) {
-    return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 });
 
