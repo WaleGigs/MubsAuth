@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const cors = require("cors");  // Importing CORS package
 require("dotenv").config(); // Load environment variables from .env file
 
 // Initialize app
@@ -10,6 +11,7 @@ const DataB = process.env.DATAB; // Get the MongoDB connection string from .env
 
 // Middleware
 app.use(bodyParser.json());
+app.use(cors());  // Enable CORS for all routes
 
 // Connect to MongoDB
 mongoose
@@ -48,7 +50,7 @@ app.post("/signup", async (req, res) => {
       return res.status(409).json({ message: "User already exists." });
     }
 
-    // Create and save the new user (without hashing the password)
+    // Create and save the new user (without hashing the password for now)
     const newUser = new User({ emailOrPhone, password });
     await newUser.save();
 
@@ -61,6 +63,11 @@ app.post("/signup", async (req, res) => {
 // Home route for testing
 app.get("/", (req, res) => {
   res.send("Server is running...");
+});
+
+// Catch-all route for undefined endpoints (this will help return a proper 404)
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
 });
 
 // Start the server
