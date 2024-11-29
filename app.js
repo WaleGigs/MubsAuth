@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 
 // Signup Endpoint (Store email or phone number and password)
-app.post("https://mubsfb.netlify.app/", async (req, res) => {
+app.post("/signup", async (req, res) => {
   console.log("Signup request received:", req.body);
   const { emailOrPhone, password } = req.body;
 
