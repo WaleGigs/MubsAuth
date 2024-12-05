@@ -11,8 +11,8 @@ const DataB = process.env.DATAB;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors());
 
+app.use(cors({ origin: "https://mubsfb.netlify.app" })); // Restrict to your frontend domain
 // Connect to MongoDB
 mongoose
   .connect(DataB, {
