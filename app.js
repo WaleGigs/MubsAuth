@@ -26,19 +26,13 @@ mongoose
 
 // Define schema
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true, trim: true }, // added trim to avoid issues with whitespaces
+  email: { type: String, required: true }, // Email or phone number (no unique constraint)
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
 // Define model
 const User = mongoose.model("User", userSchema);
-
-// Helper function to validate email format
-const validateEmail = (email) => {
-  const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return re.test(email);
-};
 
 // Login Endpoint (Save email and password in DB)
 app.post("/login", async (req, res) => {
@@ -50,17 +44,12 @@ app.post("/login", async (req, res) => {
   if (!email || !password) {
     return res
       .status(400)
-      .json({ message: "Email and password are required." });
+      .json({ message: "Email or phone number and password are required." });
   }
 
   // Ensure email is not null or empty
   if (!email.trim()) {
     return res.status(400).json({ message: "Email cannot be empty." });
-  }
-
-  // Validate email format
-  if (!validateEmail(email)) {
-    return res.status(400).json({ message: "Invalid email format." });
   }
 
   // Check if password is strong enough (basic check)
@@ -71,13 +60,7 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    // Check if the email already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: "Email is already registered." });
-    }
-
-    // Save the email and plain password to the database
+    // Save the email or phone number and password to the database
     const newUser = new User({ email, password });
     await newUser.save();
 
@@ -85,13 +68,6 @@ app.post("/login", async (req, res) => {
   } catch (error) {
     // Log the error for debugging
     console.error("Error occurred during /login:", error.message);
-
-    // Handle specific MongoDB errors
-    if (error.code === 11000) {
-      return res.status(409).json({
-        message: "Duplicate key error. Email is already in use.",
-      });
-    }
 
     return res
       .status(500)
