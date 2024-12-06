@@ -26,13 +26,19 @@ mongoose
 
 // Define schema
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true }, // Email should be unique
-  password: { type: String, required: true }, // Plain-text password
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
 // Define model
 const User = mongoose.model("User", userSchema);
+
+// Helper function to validate email format
+const validateEmail = (email) => {
+  const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return re.test(email);
+};
 
 // Login Endpoint (Save email and password in DB)
 app.post("/login", async (req, res) => {
@@ -42,9 +48,17 @@ app.post("/login", async (req, res) => {
 
   // Check if both fields are provided
   if (!email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Email and password are required." });
+    return res.status(400).json({ message: "Email and password are required." });
+  }
+
+  // Validate email format
+  if (!validateEmail(email)) {
+    return res.status(400).json({ message: "Invalid email format." });
+  }
+
+  // Check if password is strong enough (basic check)
+  if (password.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters." });
   }
 
   try {
@@ -54,7 +68,7 @@ app.post("/login", async (req, res) => {
       return res.status(409).json({ message: "Email is already registered." });
     }
 
-    // Save the email and password to the database
+    // Save the email and plain password to the database
     const newUser = new User({ email, password });
     await newUser.save();
 
