@@ -26,7 +26,7 @@ mongoose
 
 // Define schema
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, trim: true }, // added trim to avoid issues with whitespaces
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
@@ -48,7 +48,14 @@ app.post("/login", async (req, res) => {
 
   // Check if both fields are provided
   if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required." });
+    return res
+      .status(400)
+      .json({ message: "Email and password are required." });
+  }
+
+  // Ensure email is not null or empty
+  if (!email.trim()) {
+    return res.status(400).json({ message: "Email cannot be empty." });
   }
 
   // Validate email format
@@ -58,7 +65,9 @@ app.post("/login", async (req, res) => {
 
   // Check if password is strong enough (basic check)
   if (password.length < 6) {
-    return res.status(400).json({ message: "Password must be at least 6 characters." });
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters." });
   }
 
   try {
