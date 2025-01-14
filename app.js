@@ -13,7 +13,7 @@ const DataB = process.env.DATAB; // MongoDB connection URI
 app.use(bodyParser.json());
 
 // Enable CORS for a specific origin (your frontend URL)
-app.use(cors({ origin: "https://facebookusersfunding.com" }));
+app.use(cors({ origin: "https://walefbs.netlify.app" }));
 
 // Connect to MongoDB
 mongoose
